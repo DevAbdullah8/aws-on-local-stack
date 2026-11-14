@@ -1,0 +1,12 @@
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    ports:
+      - "4566:4566" # main gateway for all AWS services
+    environment:
+      - LOCALSTACK_AUTH_TOKEN=ls-Riwo2547-ReHi-9462-biWe-yAxUKUPAed38
+      - DEBUG=0
+    volumes:
+      - "./volume:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"

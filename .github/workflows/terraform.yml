@@ -1,0 +1,44 @@
+name: Terraform on LocalStack
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start LocalStack
+        working-directory: .
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+        run: |
+          docker run -d --name localstack -p 4566:4566 \
+            -e LOCALSTACK_AUTH_TOKEN="$LOCALSTACK_AUTH_TOKEN" \
+            localstack/localstack:latest
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:4566/_localstack/health && break
+            sleep 2
+          done
+          docker ps
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - run: terraform fmt -check
+      - run: terraform init
+      - run: terraform validate
+      - run: terraform plan
+      - run: terraform apply -auto-approve
+      - run: terraform output
+
+      - name: Show LocalStack logs on failure
+        if: failure()
+        working-directory: .
+        run: docker logs localstack
