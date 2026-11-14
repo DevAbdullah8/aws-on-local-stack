@@ -17,12 +17,11 @@ jobs:
 
       - name: Start LocalStack
         working-directory: .
-        env:
-          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+        # env:
+        #   LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
         run: |
           docker run -d --name localstack -p 4566:4566 \
-            -e LOCALSTACK_AUTH_TOKEN="$LOCALSTACK_AUTH_TOKEN" \
-            localstack/localstack:latest
+            localstack/localstack:3.8.1
           for i in $(seq 1 30); do
             curl -sf http://localhost:4566/_localstack/health && break
             sleep 2
